@@ -32,18 +32,13 @@ def shower(show=True):
 
 
 def string_check(x,enz="",ink=".",out="$$$",stz="",win=True):
-    """字符串check  return bool逻辑结果
-    x: string 字符串
-    enz: endswith字符组,
-    ink：in keyword 含有字符
-    out：not in x不含字符"""
+    """字符串check  :return: bool逻辑值  :param x: string 字符串;
+     :param enz: endswith字符组;  param ink: in keyword 含有字符；  :param out: not in x不含字符;
+     :param stz: endswith字符;   :param win: 忽略大小写，全部转小写;"""
     if win: enz,ink,out,stz,x = (z.lower() for z in (enz,ink,out,stz,x))
-    enz = any(x.endswith(y) for y in enz.strip().split()) if enz else True
-    stz = any(x.startswith(y) for y in stz.strip().split()) if stz else True
-    ink = all(y in x for y in ink.strip().split()) if ink else True
-    out = all(y not in x for y in out.strip().split()) if out else True
+    enz, stz = (not z or any(x.endswith(y) for y in z.strip().split()) for z in (enz,stz))  # any
+    ink, out = (not z or all(y in x if z == ink else y not in x for y in z.strip().split()) for z in (ink,out))
     return enz and stz and ink and out
-
 
 @shower()
 def get_root_sub(path,enz="img",file=True,**args):
