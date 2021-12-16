@@ -37,8 +37,7 @@ def string_check(x,enz="",ink=".",out="$$$",stz="",win=True):
     enz: endswith字符组,
     ink：in keyword 含有字符
     out：not in x不含字符"""
-    if win:
-        enz,ink,out,stz,x = enz.lower(),ink.lower(),out.lower(),stz.lower(),x.lower()
+    if win: enz,ink,out,stz,x = (z.lower() for z in (enz,ink,out,stz,x))
     enz = any(x.endswith(y) for y in enz.strip().split()) if enz else True
     stz = any(x.startswith(y) for y in stz.strip().split()) if stz else True
     ink = all(y in x for y in ink.strip().split()) if ink else True
