@@ -347,6 +347,39 @@ def pword(dir,pdf=True,dlt=False):
     # doc.add_all(dir)
     doc._save()
 
+    
+def mk_dirs(path,newdirs):
+    """批量新建文件夹"""
+    for x in newdirs:  # 批量新建文件夹
+        x = os.path.join(path,x.strip())
+        if not os.path.exists(x): os.makedirs(x)
+    return
+
+
+def get_exts(path,sub=True,dot=False):
+    """获取目录内所有文件后缀，默认小写无点"""
+    from os.path import splitext
+    exts = set(splitext(i)[-1].lower() for r, d, x in os.walk(path) for i in x if sub or r == path)
+    return exts if dot else [x.strip(".") for x in exts]
+
+
+def filed_by(path,newdirs="",inside=True,sub=True):
+    """默认按文件后缀归类文件"""
+    fn = lambda x,y: x.lower() in y.lower() if inside else y.lower().endswith(x.lower())
+    dir_names = newdirs.strip().split() or get_exts(path)
+    mk_dirs(path,dir_names)
+    for en,(root, dir, files) in enumerate,(os.walk(path,topdown=False)):
+        if sub or root == path:
+            for file in files:   # 批量文件归到各类文件夹
+                for iname in dir_names:
+                    if os.path.split(root)[-1].lower() not in dir_names: # 排除新建目录
+                        if fn(iname,file):
+                            nf = os.path.join(path, iname, file)
+                            nf = nf if not os.path.exists(nf) else f"_{os.path.split(root)[-1]}_{str(en)}".join(os.path.splitext(nf)) # 避免重名
+                            file = os.path.join(root,file)
+                            os.renames(file,nf)
+    return
+
 
 if __name__ == "__main__":
     # main()
