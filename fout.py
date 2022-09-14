@@ -368,7 +368,7 @@ def filed_by(path,newdirs="",inside=False,sub=True):
     fn = lambda x,y: x.lower() in y.lower() if inside else y.lower().endswith(x.lower())
     dir_names = newdirs.strip().split() or get_exts(path)
     mk_dirs(path,dir_names)
-    for en,(root, dir, files) in enumerate,(os.walk(path,topdown=False)):
+    for en,(root, dir, files) in enumerate(os.walk(path,topdown=False)):
         if sub or root == path:
             for file in files:   # 批量文件归到各类文件夹
                 for iname in dir_names:
