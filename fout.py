@@ -363,7 +363,7 @@ def get_exts(path,sub=True,dot=False):
     return exts if dot else [x.strip(".") for x in exts]
 
 
-def filed_by(path,newdirs="",inside=True,sub=True):
+def filed_by(path,newdirs="",inside=False,sub=True):
     """默认按文件后缀归类文件"""
     fn = lambda x,y: x.lower() in y.lower() if inside else y.lower().endswith(x.lower())
     dir_names = newdirs.strip().split() or get_exts(path)
