@@ -333,28 +333,4 @@ def excel(func):
     return wrapper
 
 
-def stamp_from(date_str,fmt="%Y%m%d"):
-    # 转换为时间戳:
-    timeArray = time.strptime(date_str,fmt)
-    timeStamp = int(time.mktime(timeArray))
-    return timeStamp
 
-
-def time_from(stamp,fmt="%Y%m%d %H:%M:%S"):
-    """时间戳转字符串"""
-    return time.strftime(fmt, time.localtime(stamp))
-
-
-def swap_time(st,fmt="%Y%m%d %H:%M:%S"):
-    """时间戳与时间字符串互转"""
-    if isinstance(st,str):return stamp_from(st,fmt)
-    elif isinstance(st,(int,float)): return time_from(st,fmt)
-    else:print("check st")
-
-
-@timer()
-def chrome_():
-    d = CDriver(crm(r"http://ssthjj.zhuhai.gov.cn/zxfw/xmgsgg/slgg/index.html",img=False))
-    print(d.tag_contents("a","text href",ink="报告"))
-    print(d.tag_content("a", ink="报告"))
-    d._quit()
