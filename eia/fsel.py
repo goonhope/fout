@@ -358,10 +358,3 @@ def chrome_():
     print(d.tag_contents("a","text href",ink="报告"))
     print(d.tag_content("a", ink="报告"))
     d._quit()
-
-
-if __name__ == '__main__':
-    # xlsx = os.path.join(fdir(),"x.xlsx")
-    # xlsx = r"C:\Users\surface\Downloads\b.xlsx"
-    # print(excel_raw(xlsx,rg=(3,36,11,46)))
-    chrome_()
