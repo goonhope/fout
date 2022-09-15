@@ -24,6 +24,38 @@ city_args = {"珠海": (r'http://ssthjj.zhuhai.gov.cn/zxfw/xmgsgg/slgg/index.htm
                   }
 
 
+
+def temp_dir(file=""):
+    """临时目录"""
+    return os.path.join(os.path.dirname(__file__), "config",file)
+
+
+def open_txt(keys="",file="delaw.log"):
+    """集成txt读取和写入"""
+    file = temp_dir(file)
+    if keys:
+        with open(file, "w", encoding="utf-8") as f:
+            if isinstance(keys,list):
+                f.write(list2d(keys))
+            else: print("check!!!")
+    else:
+        if not os.path.exists(file): return []
+        else:
+            with open(file, "r", encoding="utf-8") as f:
+                info = f.read()
+                return list2d(info)
+
+
+def list2d(llist,stp=r"'\" \t"):
+    """二维数列与字符串转换"""
+    if isinstance(llist,list):
+        return "\n".join(["\t".join([str(x).strip(stp) for x in key]) for key in llist])
+    elif isinstance(llist,str):
+        return [x.strip(stp).split("\t") for x in llist.strip().split("\n") if x.strip()] if llist else []
+    else:
+        return False
+
+
 class Nd(CDriver):
     """珠海市环评"""
     def __init__(self,city="珠海",*args,**kwargs):
@@ -59,7 +91,7 @@ class Nd(CDriver):
         self._quit()
         self.list_from()
 
-    @excel(True, dir=os.path.join(os.path.dirname(__file__),"config"),na="环评", t=False)
+    @excel(True, dir=temp_dir(),na="环评", t=False)
     def list_from(self,titles='受理日期 项目名称 建设单位 建设地点 环评单位 类型 文件地址'):
         """转二维列表输出 """
         lhold = [x.split() + [y] for x, y in self.hold.items()]
@@ -109,46 +141,19 @@ class Nd(CDriver):
         self.ifs = self.inkeys and any(x in stri for x in self.inkeys)
 
 
-def open_txt(keys="",file="delaw.log"):
-    """集成txt读取和写入"""
-    file = os.path.join(os.path.dirname(__file__),"config",file)
-    if keys:
-        with open(file, "w", encoding="utf-8") as f:
-            if isinstance(keys,list):
-                f.write(list2d(keys))
-            else: print("check!!!")
-    else:
-        if not os.path.exists(file): return []
-        else:
-            with open(file, "r", encoding="utf-8") as f:
-                info = f.read()
-                return list2d(info)
 
-
-def list2d(llist,stp=r"'\" \t"):
-    """二维数列与字符串转换"""
-    if isinstance(llist,list):
-        return "\n".join(["\t".join([str(x).strip(stp) for x in key]) for key in llist])
-    elif isinstance(llist,str):
-        return [x.strip(stp).split("\t") for x in llist.strip().split("\n") if x.strip()] if llist else []
-    else:
-        return False
-
-
-def eia(city="珠海",search=False):
+def eia(city="珠海"):
     """环评 """
-    d = Nd(city,crm("",img=True if search else False))
+    d = Nd(city,crm("",img=False))
     d.go()
 
 
-# @pd_xls
-def deal_eia(file="",pdata=True):
+@pd_xls
+def deal_eia(file=temp_dir(f"环评.xls"),pdata=True):
     "数据分析"
-    file = file or os.path.join(os.path.dirname(__file__),"config","环评.xls")
     xls = Analysis(file,dt=str)
     old = xls.open()
     xls.add_clos(lambda x: x.replace("（","(").replace("）",")"), "环评单位", "环评单位")
-    # xls.add_clos(lambda x:x[:4],"受理日期","受理日期")
     xls.add_clos(lambda x: 1, "all", "类型")
     xls.add_clos(lambda x: 1 if "表" in x else 0 ,"表","类型")
     xls.add_clos(lambda x: 1 if "书" in x else 0, "书", "类型")
@@ -158,7 +163,7 @@ def deal_eia(file="",pdata=True):
     return (old,xls.sdata,da) if pdata else da.index.tolist()
 
 
-@excel(1,na="eia_unit")
+@excel(1,dir=temp_dir(),na="eia_unit",t=False)
 def get_eia_unit(unit="铁汉环保集团有限公司"):
     url = r"http://114.251.10.92:8080/XYPT/unit/list"
     if isinstance(unit,str): unit = unit.strip().split()
@@ -170,37 +175,58 @@ def get_eia_unit(unit="铁汉环保集团有限公司"):
         x = d.tag_content("#contentTable td",ink="")
         hold.append(x) if x else hold.append(["1",n])
         d.tsleep(1.2)
+    d._quit()
     print(hold)
     return hold
 
 
 @pd_xls
-def deal_unit(file=""):
+def deal_unit(file=temp_dir("eia_unit.xls")):
     """单位信息处理"""
-    file = file or os.path.join(os.path.dirname(__file__),"config","eia_unit.xls")
     xls = Analysis(file,dt=str)
     old = xls.open()
     xls.add_clos(lambda x:str(x)[:2] if x else "" ,"省","住所")
     xls.add_clos(lambda x: str(x).split("-")[1][:2] if x and "-" in str(x) else "", "市", "住所")
-    # xls.sdata.loc[xls.sdata["省"] == "", "省"] = xls.sdata["住所"][:2]
-    # da = pd.pivot_table(xls.sdata,index="环评名称".split(), values="表 书 all".split(),aggfunc=np.sum)
-    # da = da["表 书 all".split()]
-    # da.sum()
     return old,xls.sdata
 
 
 @pd_xls
-def deal_all(file=""):
-    file = file or os.path.join(os.path.dirname(__file__),"config","环评_PYD.xlsx")
+def deal_all(file=temp_dir("环评_PYD.xlsx")):
     xls = Analysis(file,sheet=2)
     old = xls.open()
-    da = pd.pivot_table(xls.sdata,index="省	市".split(), values="表 书 all".split(),aggfunc=np.sum)
+    da = pd.pivot_table(xls.sdata,index="省 市".split(), values="表 书 all".split(),aggfunc=np.sum)
     return old,da
 
 
+def rd_excel(xls,sheet=0,skp=None,col=None,dt=None):
+    """读取xlsx 转"""
+    engine = 'openpyxl' if xls.lower().endswith("xlsx") else None
+    data = pd.read_excel(xls,sheet,skiprows=skp,usecols=col,engine=engine,dtype=dt)
+    return data
+
+
+@pd_xls
+def deal_all(xls1=temp_dir("环评_PYD.xlsx"),xls2=temp_dir("eia_unit_PYD.xlsx")):
+    """两表数据结合"""
+    pd1 = rd_excel(xls1,2)
+    pd2 = rd_excel(xls2,1)
+    out = pd.merge(pd1,pd2[["环评单位","省","市"]],how="inner",on="环评单位")
+    da = pd.pivot_table(out, index="省 市".split(), values="表 书 all".split(), aggfunc=np.sum)
+    return out,da
+
+
+def eia_anly(city="广州"):
+    """集成"""
+    # eia(city)
+    # deal_eia(temp_dir("环评.xls"), pdata=True)
+    # unit = deal_eia(temp_dir("环评.xls"), pdata=False)
+    # get_eia_unit(unit)
+    # deal_unit(temp_dir("eia_unit.xls"))
+    deal_all(temp_dir("环评_PYD.xlsx"))
+ 
+
+
 if __name__ == "__main__":
-    # eia(city="珠海")
-    # print( )
-    # x = deal_eia(os.path.join(os.path.dirname(__file__),"config","环评.xls"),1)
-    # print(x)
-    deal_all( os.path.join(os.path.dirname(__file__),"config","环评_PYD.xlsx"))
+    eia_anly()
+
+
