@@ -359,8 +359,9 @@ def mk_dirs(path,newdirs):
 def get_exts(path,sub=True,dot=False):
     """获取目录内所有文件后缀，默认小写无点"""
     from os.path import splitext
-    exts = set(splitext(i)[-1].lower() for r, d, x in os.walk(path) for i in x if sub or r == path)
-    return exts if dot else [x.strip(".") for x in exts]
+    fn = lambda i: splitext(i)[-1].lower() if dot else splitext(i)[-1].lower().strip(".")
+    exts = set(fn(i) for r, d, x in os.walk(path) for i in x if i and sub or r == path)
+    return exts
 
 
 def filed_by(path,newdirs="",inside=False,sub=True):
