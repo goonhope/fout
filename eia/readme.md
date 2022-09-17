@@ -9,3 +9,5 @@
 |广州_环评_PYD_PYD.xlsx|广州环评公示按单位所在地汇总|
 |环评_PYD.xlsx|珠海近一年环评公示数据及汇总|
 |环评_PYD_PYD.xlsx|珠海近一年环评公示按单位所在地汇总|
+
+###### ` console.log(Array.from($$("div[role=rowheader]"),x=>x.innerText).filter(i=>i !=". .").join("\n"))`
