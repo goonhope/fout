@@ -5,7 +5,7 @@
 @Updated  :   2022/06/19 12:51
 @Author		:   goonhope@gmail.com
 @Function	:   信息查询
-@notes    ：  环评受理公告抓取
+@notes    ：  环评受理公告抓取 console.log(Array.from($$("div[role=rowheader]"),x=>x.innerText).filter(i=>i !=". .").join("\n"))
 '''
 from Project.fsel import *
 import os,time
