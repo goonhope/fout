@@ -17,10 +17,14 @@ from docx.oxml.ns import qn
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT as align,WD_BREAK
 from PIL import Image, ImageDraw, ImageFont
 from win32com.client import Dispatch
-from Project.function import show,get_excel
 
 
+def show(path):
+    '''打开目录或文件——open path with explorer'''
+    cmd = r"start {}" if path.find(" ") == -1 else r'start "" "{}"'
+    os.system(cmd.format(path))
 
+    
 def shower(show=True):
     '''print装饰器'''
     def inner(func):
